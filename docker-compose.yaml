@@ -1,0 +1,112 @@
+zookeeper:
+  hostname: zookeeper
+  image: netflixoss/exhibitor:1.5.2
+  ports:
+  - 2181
+  - 2888
+  - 3888
+  - 8080
+  dns:
+  - 8.8.8.8
+  - 8.8.4.4
+mesosmaster:
+  hostname: mesosmaster
+  image: mesosphere/mesos:0.23.0-1.0.ubuntu1404
+  entrypoint:
+  - bash
+  - -cexu
+  - >
+    exec mesos-master
+    --hostname=$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
+  command: ~
+  ports:
+  - 5050
+  environment:
+  - MESOS_PORT=5050
+  - MESOS_ZK=zk://zookeeper:2181/mesos
+  - MESOS_LOG_DIR=/var/log/mesos
+  - MESOS_QUORUM=1
+  - MESOS_REGISTRY=in_memory
+  - MESOS_WORK_DIR=/var/lib/mesos
+  links:
+  - zookeeper
+  volumes:
+  - ${MCD_LOG_DIR}/mesosmaster:/var/log/mesos
+  - ${MCD_WORK_DIR}/mesosmaster:/var/tmp/mesos
+  dns:
+  - 172.17.42.1
+  - 8.8.8.8
+  - 8.8.4.4
+mesosdns:
+  hostname: mesosdns
+  image: mesosphere/mesos-dns:0.1.2-1ae2ba0-alpine-debian-wheezy-d574b5b
+  command: [ "/usr/bin/mesos-dns", "-v=2", "-config=/config.json" ]
+  ports:
+  - 172.17.42.1:53:53/udp
+  - 8123
+  volumes:
+  - ${MCD_DNS_CONFIG_PATH}:/config.json
+  - ${MCD_LOG_DIR}/mesosdns:/tmp
+  links:
+  - zookeeper
+  dns:
+  - 8.8.8.8
+  - 8.8.4.4
+mesosslave:
+  hostname: mesosslave
+  privileged: true
+  image: mesosphere/mesos-slave-dind:0.23.0-1.0.ubuntu1404.docker181
+  entrypoint:
+  - bash
+  - -cexu
+  - >
+    NAME=$(cut -f2 -d/ <<<${ZOOKEEPER_NAME}) &&
+    N=${NAME##*_} &&
+    DOCKER_NETWORK_OFFSET=0.0.${N}.0
+    exec wrapdocker mesos-slave
+    --work_dir="/var/tmp/mesos/${N}"
+    --log_dir="/var/log/mesos/${N}"
+    --attributes="rack:${N};gen:201${N}"
+    --hostname=$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
+  command: ~
+  ports:
+  - 5051
+  environment:
+  - MESOS_MASTER=zk://zookeeper:2181/mesos
+  - MESOS_PORT=5051
+  - MESOS_LOGGING_LEVEL=INFO
+  - MESOS_RESOURCES=cpus:4;mem:1280;disk:25600;ports:[21000-21099]
+  - MESOS_SWITCH_USER=0
+  - MESOS_CONTAINERIZERS=docker,mesos
+  - DOCKER_DAEMON_ARGS
+  links:
+  - zookeeper
+  - mesosdns
+  volumes:
+  - ${MCD_LOG_DIR}/mesosslave:/var/log/mesos
+  - ${MCD_WORK_DIR}/mesosslave:/var/tmp/mesos
+  dns:
+  - 172.17.42.1
+  - 8.8.8.8
+  - 8.8.4.4
+marathon:
+  hostname: marathon
+  image: mesosphere/marathon
+  entrypoint:
+  - bash
+  - -cexu
+  - >
+    exec bin/start
+    --hostname $(getent hosts marathon | cut -d' ' -f1 | sort -u | tail -1)
+    --master zk://zookeeper:2181/mesos
+    --zk zk://zookeeper:2181/marathon
+  command: ~
+  ports:
+  - 8080
+  links:
+  - zookeeper
+  - mesosdns
+  dns:
+  - 172.17.42.1
+  - 8.8.8.8
+  - 8.8.4.4

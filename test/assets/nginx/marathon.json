@@ -1,0 +1,19 @@
+{
+  "id": "nginx",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "nginx:1.9.4",
+      "network": "HOST"
+    }
+  },
+  "instances": 1,
+  "cpus": 1,
+  "mem": 640,
+  "constraints": [
+    [
+      "hostname",
+      "UNIQUE"
+    ]
+  ]
+}
