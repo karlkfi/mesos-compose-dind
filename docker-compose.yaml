@@ -17,8 +17,8 @@ mesosmaster:
   - -cexu
   - >
     exec mesos-master
-    --hostname=$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
-  command: ~
+    --hostname=$$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
+  command: []
   ports:
   - 5050
   environment:
@@ -34,7 +34,7 @@ mesosmaster:
   - ${MCD_LOG_DIR}/mesosmaster:/var/log/mesos
   - ${MCD_WORK_DIR}/mesosmaster:/var/tmp/mesos
   dns:
-  - 172.17.42.1
+  - 172.17.0.1
   - 8.8.8.8
   - 8.8.4.4
 mesosdns:
@@ -42,7 +42,7 @@ mesosdns:
   image: mesosphere/mesos-dns:0.1.2-1ae2ba0-alpine-debian-wheezy-d574b5b
   command: [ "/usr/bin/mesos-dns", "-v=2", "-config=/config.json" ]
   ports:
-  - 172.17.42.1:53:53/udp
+  - 172.17.0.1:53:53/udp
   - 8123
   volumes:
   - ${MCD_DNS_CONFIG_PATH}:/config.json
@@ -60,15 +60,15 @@ mesosslave:
   - bash
   - -cexu
   - >
-    NAME=$(cut -f2 -d/ <<<${ZOOKEEPER_NAME}) &&
-    N=${NAME##*_} &&
-    DOCKER_NETWORK_OFFSET=0.0.${N}.0
+    NAME=$$(cut -f2 -d/ <<<$${ZOOKEEPER_NAME}) &&
+    N=$${NAME##*_} &&
+    DOCKER_NETWORK_OFFSET=0.0.$${N}.0
     exec wrapdocker mesos-slave
-    --work_dir="/var/tmp/mesos/${N}"
-    --log_dir="/var/log/mesos/${N}"
-    --attributes="rack:${N};gen:201${N}"
-    --hostname=$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
-  command: ~
+    --work_dir="/var/tmp/mesos/$${N}"
+    --log_dir="/var/log/mesos/$${N}"
+    --attributes="rack:$${N};gen:201$${N}"
+    --hostname=$$(getent hosts mesosslave | cut -d' ' -f1 | sort -u | tail -1)
+  command: []
   ports:
   - 5051
   environment:
@@ -86,7 +86,7 @@ mesosslave:
   - ${MCD_LOG_DIR}/mesosslave:/var/log/mesos
   - ${MCD_WORK_DIR}/mesosslave:/var/tmp/mesos
   dns:
-  - 172.17.42.1
+  - 172.17.0.1
   - 8.8.8.8
   - 8.8.4.4
 marathon:
@@ -97,16 +97,16 @@ marathon:
   - -cexu
   - >
     exec bin/start
-    --hostname $(getent hosts marathon | cut -d' ' -f1 | sort -u | tail -1)
+    --hostname $$(getent hosts marathon | cut -d' ' -f1 | sort -u | tail -1)
     --master zk://zookeeper:2181/mesos
     --zk zk://zookeeper:2181/marathon
-  command: ~
+  command: []
   ports:
   - 8080
   links:
   - zookeeper
   - mesosdns
   dns:
-  - 172.17.42.1
+  - 172.17.0.1
   - 8.8.8.8
   - 8.8.4.4

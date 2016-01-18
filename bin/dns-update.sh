@@ -29,7 +29,7 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 #mesos_dns_ip="$(util::find_docker_service_ips "mesosdns" | tail -1 || echo)"
-# use 172.17.42.1
+# use 172.17.0.1
 mesos_dns_ip=${1:-}
 
 # Remove old (docker network) nameservers and add new ones

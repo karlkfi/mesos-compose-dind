@@ -122,7 +122,7 @@ In order to allow resolution of domain names on your host machine, mesos-dns nee
 #### Add Nameserver
 
 ```
-sudo ./bin/dns-update.sh 172.17.42.1
+sudo ./bin/dns-update.sh 172.17.0.1
 ```
 
 WARNING: This can be done before or after create, but will slow down host domain name resolution if mesos-dns is not running.
