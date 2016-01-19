@@ -19,7 +19,7 @@ set -o nounset
 set -o pipefail
 set -o errtrace
 
-project_root=$(cd "$(dirname "${BASH_SOURCE}/..")" && pwd)
+project_root="$(cd "$(dirname "${BASH_SOURCE}")/.." && pwd -P)"
 
 source "${project_root}/lib/util.sh"
 
