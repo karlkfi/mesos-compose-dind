@@ -4,7 +4,10 @@
     "type": "DOCKER",
     "docker": {
       "image": "nginx:1.9.4",
-      "network": "HOST"
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 80, "hostPort": 0, "protocol": "tcp" }
+      ]
     }
   },
   "instances": 1,
@@ -15,5 +18,15 @@
       "hostname",
       "UNIQUE"
     ]
+  ],
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "portIndex": 0,
+      "path": "/",
+      "gracePeriodSeconds": 1,
+      "intervalSeconds": 1,
+      "maxConsecutiveFailures": 30
+    }
   ]
 }

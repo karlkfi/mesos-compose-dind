@@ -11,7 +11,7 @@ zookeeper:
   - 8.8.4.4
 mesosmaster:
   hostname: mesosmaster
-  image: mesosphere/mesos:0.23.0-1.0.ubuntu1404
+  image: mesosphere/mesos:0.27.2-2.0.15.ubuntu1404
   entrypoint:
   - bash
   - -cexu
@@ -55,7 +55,7 @@ mesosdns:
 mesosslave:
   hostname: mesosslave
   privileged: true
-  image: mesosphere/mesos-slave-dind:0.23.0-1.0.ubuntu1404.docker181
+  image: mesosphere/mesos-slave-dind:0.2.4_mesos-0.27.2_docker-1.8.2_ubuntu-14.04.4
   entrypoint:
   - bash
   - -cexu
@@ -91,7 +91,7 @@ mesosslave:
   - 8.8.4.4
 marathon:
   hostname: marathon
-  image: mesosphere/marathon
+  image: mesosphere/marathon:v0.15.3
   entrypoint:
   - bash
   - -cexu
