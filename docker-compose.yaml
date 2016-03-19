@@ -39,7 +39,7 @@ mesosmaster:
   - 8.8.4.4
 mesosdns:
   hostname: mesosdns
-  image: mesosphere/mesos-dns:0.1.2-1ae2ba0-alpine-debian-wheezy-d574b5b
+  image: mesosphere/mesos-dns:0.5.2
   command: [ "/usr/bin/mesos-dns", "-v=2", "-config=/config.json" ]
   ports:
   - 172.17.0.1:53:53/udp
