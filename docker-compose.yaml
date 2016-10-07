@@ -11,7 +11,7 @@ zookeeper:
   - 8.8.4.4
 mesosmaster:
   hostname: mesosmaster
-  image: mesosphere/mesos:0.27.2-2.0.15.ubuntu1404
+  image: mesosphere/mesos:1.0.11.0.1-2.0.93.ubuntu1404
   entrypoint:
   - bash
   - -cexu
@@ -39,7 +39,7 @@ mesosmaster:
   - 8.8.4.4
 mesosdns:
   hostname: mesosdns
-  image: mesosphere/mesos-dns:0.5.2
+  image: mesosphere/mesos-dns:v0.6.0
   command: [ "/usr/bin/mesos-dns", "-v=2", "-config=/config.json" ]
   ports:
   - 172.17.0.1:53:53/udp
@@ -55,7 +55,7 @@ mesosdns:
 mesosslave:
   hostname: mesosslave
   privileged: true
-  image: mesosphere/mesos-slave-dind:0.2.4_mesos-0.27.2_docker-1.8.2_ubuntu-14.04.4
+  image: mesosphere/mesos-slave-dind:0.3.0_mesos-1.0.1_docker-1.10.3_ubuntu-14.04.5
   entrypoint:
   - bash
   - -cexu
@@ -91,7 +91,7 @@ mesosslave:
   - 8.8.4.4
 marathon:
   hostname: marathon
-  image: mesosphere/marathon:v0.15.3
+  image: mesosphere/marathon:v1.4.0
   entrypoint:
   - bash
   - -cexu
