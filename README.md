@@ -16,66 +16,36 @@ The cluster consists of several docker containers linked together by docker-mana
 | Marathon              | marathon.mesos                                 | resource scheduler & container PaaS             |
 
 
-### Prerequisites
+### Install on Mac
 
-Required:
+1. Install [Docker For Mac](https://www.docker.com/docker-mac)
+
+2. Install [wget](http://www.gnu.org/software/wget/)
+
+    ```
+    brew install wget
+    ```
+
+3. Install [probe](https://github.com/karlkfi/probe)
+
+    ```
+    brew tap karlkfi/homebrew-terminal
+    brew install probe
+    ```
+
+### Install on Linux
+
 - [Docker CLI](https://docs.docker.com/) - container management command line client
 - [Docker Engine](https://docs.docker.com/) - container management daemon
-  - On Mac, use [Docker-Machine](https://docs.docker.com/machine/install-machine/)
 - [Docker Compose](https://docs.docker.com/compose/install/) - multi-container application orchestration
 - [Probe](https://github.com/karlkfi/probe) (&gt;= 0.2.0) - command-line service interrogator
 - [Wget](http://www.gnu.org/software/wget/) - command-line http client
-
-Optional:
-- [Virtual Box](https://www.virtualbox.org/wiki/Downloads) - x86 hardware virtualizer
-  - Required by Docker-Machine
-
-
-#### Install on Mac (Homebrew)
-
-Install all of the above via [Homebrew](http://brew.sh/).
-
-Some steps print instructions for configuring or launching. Make sure each is properly set up before continuing to the next step.
-
-```
-brew install caskroom/cask/brew-cask
-brew cask install virtualbox
-brew install docker
-brew install docker-machine
-docker-machine create --driver=virtualbox \
-  --virtualbox-cpu-count=4 \
-  --virtualbox-disk-size=102400 \
-  --virtualbox-memory=4096 \
-  dev
-eval "$(docker-machine env dev)"
-brew install docker-compose
-brew install wget
-brew tap karlkfi/homebrew-terminal
-brew install probe
-```
-
-#### Install on Linux
 
 Most of the above are available via apt and yum, but depending on your distribution, you may have to install via other
 means to get the latest versions.
 
 It is recommended to use Ubuntu, simply because it supports OverlayFS, used by docker to mount volumes. Alternate file
 systems may not fully support docker-in-docker.
-
-
-#### Docker-Machine Config (Mac)
-
-If on a Mac using Docker-Machine, the following step will make the docker IPs (in the virtualbox VM) reachable from the
-host machine (Mac).
-
-1. Route traffic to docker through the Docker-Machine IP:
-
-    ```
-    sudo route -n add -net 172.17.0.0 $(docker-machine ip dev)
-    ```
-
-    Since the Docker-Machine IP can change when the VM is restarted, this route may need to be updated over time.
-    To delete the route later: `sudo route delete 172.17.0.0`
 
 
 ### Configuration
@@ -122,7 +92,7 @@ In order to allow resolution of domain names on your host machine, mesos-dns nee
 #### Add Nameserver
 
 ```
-sudo ./bin/dns-update.sh 172.17.0.1
+sudo ./bin/dns-update.sh $(source lib/util.sh && util::find_docker_service_ips "mesosdns" | tail -1)
 ```
 
 WARNING: This can be done before or after create, but will slow down host domain name resolution if mesos-dns is not running.
@@ -176,7 +146,7 @@ docker inspect -f '{{.NetworkSettings.IPAddress}}:8080/exhibitor/v1/ui/index.htm
 
 ### License
 
-Copyright 2015 [The Mesos Compose Docker-in-Docker Authors](./AUTHORS.md)
+Copyright 2015-2018 [The Mesos Compose Docker-in-Docker Authors](./AUTHORS.md)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -7,7 +7,7 @@
   "domain": "mesos",
   "ns": "ns1",
   "port": 53,
-  "resolvers": ["8.8.8.8", "8.8.4.4"],
+  "resolvers": ["127.0.0.11"],
   "timeout": 5,
   "listener": "0.0.0.0",
   "SOAMname": "ns1.mesos",

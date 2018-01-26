@@ -28,4 +28,4 @@ util::docker_compose scale mesosslave=${MCD_NUM_SLAVES}
 util::await_cluster
 
 echo "Cluster Started" 1>&2
-echo "Run 'sudo ./bin/dns-update.sh 172.17.0.1' to add Mesos-DNS as a nameserver, if desired." 1>&2
+echo "Run 'sudo ./bin/dns-update.sh $(util::find_docker_service_ips "mesosdns" | tail -1)' to add Mesos-DNS as a nameserver, if desired." 1>&2

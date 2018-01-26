@@ -29,7 +29,6 @@ if [ "$(whoami)" != "root" ]; then
 fi
 
 #mesos_dns_ip="$(util::find_docker_service_ips "mesosdns" | tail -1 || echo)"
-# use 172.17.0.1
 mesos_dns_ip=${1:-}
 
 # Remove old (docker network) nameservers and add new ones
@@ -92,13 +91,17 @@ function update_dns_mac {
   echo -n "Updated DNS: "
   echo "${nameservers_inline}"
 
-  if [ -f /etc/resolver/mesos ]; then
+  if ! [[ -d "/etc/resolver" ]]; then
+    mkdir -p "/etc/resolver"
+  fi
+
+  if [[ -f "/etc/resolver/mesos" ]]; then
     local old_ns_inline="$(grep "nameserver " /etc/resolver/mesos | sed -E "s/nameserver //g" | tr "\n" " ")"
     echo "Removing Resolver: *.mesos -> ${old_ns_inline}"
     rm /etc/resolver/mesos
   fi
 
-  if [ ! -z "${ns1}" ]; then
+  if [[ ! -z "${ns1}" ]]; then
     echo "Adding Resolver: *.mesos -> ${ns1}"
     bash -c "echo 'nameserver ${ns1}' > /etc/resolver/mesos"
   fi
@@ -145,8 +148,17 @@ function primary_service_name {
 # once mesos-dns is up (not timing out), domains they cannot resolve will be delegated
 # to 8.8.8.8 (Google's public DNS), NOT the host's pre-configured DNS.
 
-if grep -q "Mac OS X" /etc/resolv.conf; then
-  # Mac
+if grep -q "macOS" /etc/resolv.conf; then
+  # Mac >= v10.12
+  update_dns_mac "${mesos_dns_ip}"
+  echo
+  echo -n "WARNING: DNS is now 'hardcoded' and will not automatically update if you change networks. "
+  echo "Delete all DNS records to restore auto-updates."
+  echo
+  echo "Please reset the DNS cache for changes to take effect."
+  echo -e "High Sierra v10.13.x:\t\t???"
+elif grep -q "Mac OS X" /etc/resolv.conf; then
+  # Mac <= v10.11
   update_dns_mac "${mesos_dns_ip}"
   echo
   echo -n "WARNING: DNS is now 'hardcoded' and will not automatically update if you change networks. "

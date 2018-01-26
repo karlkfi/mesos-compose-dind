@@ -9,6 +9,8 @@ project_root=$(cd "$(dirname "${BASH_SOURCE}")/.." && pwd)
 
 source "${project_root}/env.sh"
 
+PROJECT_NAME="mcd"
+NETWORK_NAME="internal"
 
 # Execute a docker-compose command with the default environment and compose file.
 function util::docker_compose {
@@ -27,7 +29,7 @@ function util::docker_compose {
       export ${var_name}="${!var_name}"
     done
 
-    docker-compose -p "mcd" -f "${project_root}/docker-compose.yaml" ${params}
+    docker-compose -p "${PROJECT_NAME}" -f "${project_root}/docker-compose.yaml" ${params}
   )
 }
 
@@ -60,7 +62,8 @@ function util::find_docker_service_ips {
     return 1
   fi
   while read -r docker_id; do
-    local host=$(docker inspect --format="{{.NetworkSettings.IPAddress}}" "${docker_id}")
+    # local host="$(docker inspect --format="{{.NetworkSettings.IPAddress}}" "${docker_id}")"
+    local host="$(docker inspect --format="{{.NetworkSettings.Networks.${PROJECT_NAME}_${NETWORK_NAME}.IPAddress}}" "${docker_id}")"
     echo "${host}"
   done <<< "${docker_ids}"
 }
